@@ -1,11 +1,11 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
-	"version": "1.0.0",
-	"minAppVersion": "1.0.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"id": "com.stevielam.obsidian.ra-sap-quote-importer",
+	"name": "Obsidian RA SAP Quote Importer",
+	"version": "0.1.0",
+	"minAppVersion": "1.12.7",
+	"description": "Creates and updates Quote notes from an exported SAP CSV",
+	"author": "Steve Lam",
+	"authorUrl": "https://github.com/stevielam",
+	"fundingUrl": "",
 	"isDesktopOnly": false
 }
