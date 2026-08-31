@@ -43,12 +43,12 @@ export const setNoteProperty = async (
 	file: TFile,
 	fileManager: FileManager,
 	key: string,
-	value: string,
+	value: string | boolean,
 ) => {
 	try {
 		await fileManager.processFrontMatter(
 			file,
-			(props: Record<string, string>) => {
+			(props: Record<string, string | boolean>) => {
 				// Directly mutate the frontmatter object
 
 				props[key] = value;
@@ -66,7 +66,7 @@ export const setNoteProperty = async (
 export const setNoteProperties = async (
 	app: App,
 	notePath: string,
-	props: Record<string, string | undefined>,
+	props: Record<string, string | boolean | undefined>,
 ) => {
 	const file = app.vault.getFileByPath(notePath);
 	if (!file) {
@@ -74,10 +74,12 @@ export const setNoteProperties = async (
 		return;
 	}
 
-	for (const prop of Object.keys(props)) {
-		const value = props[prop];
-		if (value) {
-			await setNoteProperty(file, app.fileManager, prop, value);
-		}
-	}
+	await Promise.all(
+		Object.keys(props).map(async (prop) => {
+			const value = props[prop];
+			if (value !== undefined) {
+				await setNoteProperty(file, app.fileManager, prop, value);
+			}
+		}),
+	);
 };

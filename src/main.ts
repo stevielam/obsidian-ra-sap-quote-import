@@ -1,6 +1,15 @@
 import { App, Modal, Plugin, TAbstractFile } from 'obsidian';
-import { parseQuotesCSV } from './components/quote.js';
+import {
+	createOrUpdateQuoteNote,
+	parseQuotesCSV,
+	QuoteProps,
+} from './components/quote.js';
 import { removeFile } from './components/fileUtils.js';
+import {
+	CompanyProps,
+	createOrUpdateCompanyNote,
+} from './components/company.js';
+import { createOrUpdatePersonNote, PersonProps } from './components/person.js';
 
 export default class Main extends Plugin {
 	onload(): void {
@@ -59,9 +68,47 @@ const handleQuotesFileImport = async (
 	modal.open();
 	//todo: check headers to see if expected format is being used
 	//todo:parse csv with feedback
-	await parseQuotesCSV(app, file.path, modal).catch((error) => {
-		console.error(`Error parsing CSV file: ${error}`);
-		modal.setContent(`Error parsing CSV file`);
-	});
+	const results: [QuoteProps[], PersonProps[], CompanyProps[]] =
+		await parseQuotesCSV(app, file.path, modal).catch((error) => {
+			console.error(`Error parsing CSV file: ${error}`);
+			modal.setContent(`Error parsing CSV file`);
+			return [[], [], []];
+		});
+
+	const [quotes, people, companies] = results;
+	let total = quotes.length;
+	let processed = 0;
+	await Promise.all(
+		quotes.map(async (quote) => {
+			await createOrUpdateQuoteNote(app, quote).then(() => {
+				processed++;
+				modal.setContent(`Processing quote ${processed} of ${total}`);
+			});
+		}),
+	);
+
+	total = people.length;
+	processed = 0;
+	await Promise.all(
+		people.map(async (person) => {
+			await createOrUpdatePersonNote(app, person).then(() => {
+				processed++;
+				modal.setContent(`Processing person ${processed} of ${total}`);
+			});
+		}),
+	);
+
+	total = companies.length;
+	processed = 0;
+	await Promise.all(
+		companies.map(async (company) => {
+			await createOrUpdateCompanyNote(app, company).then(() => {
+				processed++;
+				modal.setContent(`Processing company ${processed} of ${total}`);
+			});
+		}),
+	);
+
+	modal.setContent('Finished processing notes.');
 	removeFile(app.fileManager, file);
 };
